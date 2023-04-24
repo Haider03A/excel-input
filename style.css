@@ -1,0 +1,9 @@
+small,
+small[valid="false"] {
+  opacity: 0;
+}
+
+small[valid="true"] {
+  opacity: .4;
+  color: #FF0000 !important;
+}
