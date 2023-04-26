@@ -1,29 +1,18 @@
-const formRef = document.querySelector('form.enterItems');
-const itemInputRef = document.querySelector('input#itemInput')
-const priseItemRef = document.querySelector('input#priseItem')
-
 class Validation {
   #text;
   #type;
-  #maxCh;
+  #result = {
+    error: '',
+    value: ''
+  }
 
-  constructor(text, type, maxCh = false) {
-    this.#text = text;
-    this.#type = type;
-    this.#maxCh = maxCh;
+  constructor(text, maxCh = false) {
+    this.#text = text.toString().trim();
   }
 
   // Setter
   set text(newText) {
-    this.#text = newText;
-  }
-
-  set type(newType) {
-    this.#type = newType;
-  }
-
-  set maxCh(newMaxCh) {
-    this.maxCh = newMaxCh;
+    this.#text = newText.toString().trim();
   }
 
   // Getter
@@ -31,86 +20,127 @@ class Validation {
     return this.#text;
   }
 
-  get type() {
-    return this.#type;
-  }
 
-  get maxCh() {
-    return this.maxCh;
-  }
-
-  // Static Methods
-  async numberValidation() {
-    const value = this.text.toString().trim();
-    let state = false;
+  // Mathods
+  numberValidation() {
+    let state = true;
     const checkLog = []
+    const value = this.text
+    const result = this.#result
+
+    if (value == '') {
+      result.error = 'There is nothing value, enter value'
+      result.value = this.text
+      return result;
+    }
+
 
     for (let i = 0; i < value.length; i++) {
       if (state) {
         for (let ii = 0; ii < 10; ii++) {
-          if (value[i] == ii) {
-            await (state = true)
+          if (value[i] != ii) {
+            state = false;
+          } else if (value[i] == ii) {
+            state = true;
+            break;
           }
-          await checkLog.push(state)
         }
+      } else {
+        break;
       }
+      checkLog.push(state)
     }
-    console.log(checkLog);
+    const valueTrue = checkLog.find(i => i == false) == undefined ? true : checkLog.find(i => i == false);
+    if (valueTrue) {
+      result.error = false
+      result.value = this.text
+      return result;
+    } else {
+      result.error = `This value is nuvalidation, enter number only`
+      result.value = ''
+      return result;
+    }
   }
 
   // Public Methods
 
-  valid() {
-    this.numberValidation()
+  stringValidation() {
+    const value = this.text
+    const result = this.#result
+    if (value == '') {
+      result.error = 'There is nothing value, enter value'
+      result.value = this.text
+      return result;
+    } else {
+      result.error = false
+      result.value = this.text
+      return result;
+    }
   }
 
 }
 
-const itemValid = new Validation(123)
+const formRef = document.querySelector('form.enterItems');
+const nameItemtRef = document.querySelector('input#itemInput')
+const priseItemRef = document.querySelector('input#priseItem')
+const inputsHelpRef = document.querySelectorAll('form > div small')
 
-
-console.log(itemValid.valid());
-
-
-// const validation = (text, type, maxCh = false) => {
-//   const value = text.toString().trim();
-//   let state = false;
-//   value != '' && (state = true)
-//   type == 'string' && (1 == value.length) && (state = false)
-//   if (state) {
-//     if (type == 'number') {
-
-//         for (let i = 0; i < value.length; i++) {
-//           if (state) {
-//             const checkLog = []
-//           for (let ii = 0; ii < 10; ii++) {
-//             console.log(value[i], ii)
-//             if(value[i] == ii){
-
-//             state = false
-//             break;
-//             }
-
-//           }
-//         }
-//       }
-
-//       return state ? value : false
-//     } else if (type == 'string') {
-//       return 's'
-//     } else {
-//       return false;
-//     }
-//   } else {
-//     return false
-//   }
-
-// }
-
+const mainFunVaild = _ => {
+  const itemNameValid = new Validation(nameItemtRef.value)
+  const itemNameValue = itemNameValid.stringValidation()
+  
+  const priseItemValid = new Validation(priseItemRef.value)
+  const priseItemValue = priseItemValid.numberValidation()
+  
+  if (!itemNameValue.error) {
+    inputsHelpRef[0].setAttribute('valid', false)
+    inputsHelpRef[0].innerHTML = '<=>'
+  } else {
+    inputsHelpRef[0].innerHTML = itemNameValue.error
+    inputsHelpRef[0].setAttribute('valid', true)
+  }
+  
+  if (!priseItemValue.error) {
+    inputsHelpRef[1].setAttribute('valid', false)
+    inputsHelpRef[1].innerHTML = '<=>'
+  } else {
+    inputsHelpRef[1].innerHTML = priseItemValue.error
+    inputsHelpRef[1].setAttribute('valid', true)
+  }
+}
 
 formRef.addEventListener('submit', e => {
   e.preventDefault()
-  const value = validation(priseItemRef.value, 'number')
-  console.log(value)
+  mainFunVaild()
+  
 })
 
+nameItemtRef.addEventListener('keyup', e => {
+  e.target.value = e.target.value.toString().trimStart()
+  
+  const itemNameValid = new Validation(nameItemtRef.value)
+  const itemNameValue = itemNameValid.stringValidation()
+  
+  if (!itemNameValue.error) {
+    inputsHelpRef[0].setAttribute('valid', false)
+    inputsHelpRef[0].innerHTML = '<=>'
+  } else {
+    inputsHelpRef[0].innerHTML = itemNameValue.error
+    inputsHelpRef[0].setAttribute('valid', true)
+  }
+})
+
+priseItemRef.addEventListener('keyup', e => {
+  e.target.value = e.target.value.toString().trimStart()
+  
+  const priseItemValid = new Validation(priseItemRef.value)
+  const priseItemValue = priseItemValid.numberValidation()
+  
+  if (!priseItemValue.error) {
+    inputsHelpRef[1].setAttribute('valid', false)
+    inputsHelpRef[1].innerHTML = '<=>'
+  } else {
+    inputsHelpRef[1].innerHTML = priseItemValue.error
+    inputsHelpRef[1].setAttribute('valid', true)
+  }
+})
